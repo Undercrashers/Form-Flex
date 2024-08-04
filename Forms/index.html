@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A demo frontend that posts form submissions directly to a Google Form.">
+  <meta property="og:title" content="google-forms-frontend">
+  <meta property="og:description" content="A demo frontend that posts form submissions directly to a Google Form.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://forms.ardis.lu/">
+  <link rel="canonical" href="https://forms.ardis.lu/">
+  <link rel="icon" href="data:,">
+  <title>google-forms-frontend</title>
+  <style>
+    :root {
+      --black: hsl(235deg 90% 10%);
+      --white: hsl(235deg 10% 90%);
+      --primary: hsl(235deg 50% 50%);
+      --primary-lightest: hsl(235deg 30% 90%);
+      --secondary: hsl(354deg 50% 50%);
+      --secondary-lighter: hsl(354deg 20% 85%);
+    }
+
+    body {
+      font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", Helvetica, Arial,
+        sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      color: var(--black);
+      background: var(--primary-lightest);
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    main {
+      inline-size: min(100% - 16px, 720px);
+      margin-inline: auto;
+    }
+
+    a {
+      display: inline-block;
+      color: var(--secondary);
+      font-weight: 700;
+      text-decoration: none;
+      border-radius: 4px;
+    }
+
+    a::after {
+      content: "";
+      position: relative;
+      display: block;
+      block-size: 2px;
+      background: var(--secondary);
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform 400ms;
+    }
+
+    a:hover::after,
+    a:focus::after {
+      transform: scaleX(1);
+      transition: transform 150ms;
+      transform-origin: left;
+    }
+
+    button {
+      background: var(--primary);
+      color: var(--white);
+      font-weight: 700;
+      inline-size: fit-content;
+      border: none;
+      padding: 12px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: filter 500ms;
+    }
+
+    button:hover,
+    button:focus {
+      filter: brightness(110%);
+      transition: filter 150ms;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    div {
+      margin-block-end: 16px;
+      position: relative;
+    }
+
+    div::before {
+      content: "";
+      display: block;
+      position: absolute;
+      inset-inline-start: -16px;
+      inline-size: 8px;
+      block-size: 100%;
+      background: var(--secondary);
+      transform: scaleY(0);
+      transition: transform 150ms;
+    }
+
+    div:focus-within::before {
+      transform: scaleY(1);
+      transition: transform 400ms;
+    }
+
+    @keyframes shiftRight {
+      from {
+        background-position: 30%;
+      }
+
+      to {
+        background-position: 50%;
+      }
+    }
+
+    div::after {
+      content: "";
+      display: block;
+      position: absolute;
+      z-index: -1;
+      top: 0;
+      left: -8px;
+      inline-size: calc(100% + 16px);
+      block-size: 100%;
+      border-radius: 0 8px 8px 0;
+      background: linear-gradient(90deg,
+          hsl(354deg 50% 50%) 0%,
+          hsl(347deg 51% 55%) 4%,
+          hsl(341deg 50% 59%) 9%,
+          hsl(333deg 47% 63%) 14%,
+          hsl(323deg 40% 67%) 20%,
+          hsl(308deg 32% 71%) 27%,
+          hsl(288deg 31% 76%) 36%,
+          hsl(269deg 34% 81%) 46%,
+          hsl(252deg 33% 86%) 61%,
+          hsl(236deg 29% 90%) 99%);
+      background-size: 400%;
+      animation: shiftRight 3s linear infinite alternate;
+      filter: opacity(0);
+      transition: filter 300ms;
+    }
+
+    div:focus-within::after {
+      filter: opacity(0.4);
+      transition: filter 150ms;
+    }
+
+    label {
+      font-weight: 700;
+    }
+
+    aside {
+      margin-block-end: 8px;
+    }
+
+    @media (min-width: 1200px) {
+      aside {
+        position: absolute;
+        inset-block-start: 16px;
+        inset-inline-end: -8px;
+        transform: translateX(100%);
+        max-inline-size: 30ch;
+        font-weight: 300;
+      }
+
+      div:focus-within aside {
+        font-weight: 500;
+      }
+    }
+
+    input,
+    textarea {
+      box-sizing: border-box;
+      inline-size: 100%;
+      font-size: 1rem;
+      border: none;
+      border-radius: 4px;
+      padding: 8px;
+      margin-block-start: 4px;
+    }
+
+    textarea {
+      min-block-size: 3rem;
+      resize: vertical;
+    }
+
+    .help {
+      background: transparent;
+      color: var(--black);
+      border: none;
+      padding: 0;
+      inline-size: 48px;
+      position: fixed;
+      inset-inline-end: 16px;
+      inset-block-end: 16px;
+      cursor: pointer;
+    }
+
+    .help>svg {
+      transition: transform 500ms, filter 500ms;
+    }
+
+    .help>svg:hover {
+      transform: translateY(-5%);
+      filter: drop-shadow(0 0 16px var(--secondary));
+      transition: transform 150ms, filter 300ms;
+    }
+
+    dialog {
+      background: var(--primary-lightest);
+      border: none;
+      border-block-start: 8px solid var(--secondary);
+      border-radius: 0 0 4px 4px;
+    }
+
+    dialog h1 {
+      margin: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Forms</h1>
+  </header>
+
+  <main>
+    <form action="https://docs.google.com/forms/u/0/d/e/1FAIpQLSclZ7yXg5kNXTlJUKDNGMCGR9vvgKqzyUB-HfLiwc_sveTxEA/formResponse">
+      <div>
+        <label for="entry.185031848">Short answer</label>
+        <aside>Example description for the short answer.</aside>
+        <input type="text" name="entry.185031848">
+      </div>
+
+      <div>
+        <label for="entry.1096192054">Long answer</label>
+        <aside>Example description for the long answer.</aside>
+        <textarea name="entry.1096192054" rows="10"></textarea>
+      </div>
+
+      <div>
+        <label for="entry.552287623">Multiple choice</label>
+        <aside>Example description for the multiple choice.</aside>
+        <input list="multiple-choice" name="entry.552287623">
+        <datalist id="multiple-choice">
+          <option value="Multiple choice option 1">
+          <option value="Multiple choice option 2">
+          <option value="Multiple choice option 3">
+          <option value="Multiple choice option 4">
+          <option value="Multiple choice option 5">
+        </datalist>
+
+      </div>
+
+      <div>
+        <label for="entry.2010116811">Date</label>
+        <aside>Example description for the date.</aside>
+        <input type="date" name="entry.2010116811">
+      </div>
+
+      <div>
+        <label for="entry.1500214518">Time</label>
+        <aside>Example description for the time.</aside>
+        <input type="time" name="entry.1500214518">
+      </div>
+
+      <button type="submit" name="submit">Submit</button>
+      <output name="status"></output>
+    </form>
+
+    <a href="../index.html">
+      <button class="help">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="16" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12" y2="8"></line>
+        </svg>
+      </button>
+    </a>
+    
+
+    
+  </main>
+
+  <script>
+    document.querySelector('.help').addEventListener('click', e => document.querySelector('dialog').showModal());
+
+    document.querySelector('form').addEventListener('submit', async event => {
+      event.preventDefault();
+
+      const data = new FormData(event.target);
+      const params = new URLSearchParams(data);
+
+     
+      const dateValue = new Date(`${params.get('entry.2010116811')} UTC`);
+      params.set('entry.2010116811_year', dateValue.getUTCFullYear());
+      params.set('entry.2010116811_month', dateValue.getUTCMonth() + 1); 
+      params.set('entry.2010116811_day', dateValue.getUTCDate());
+
+   
+      const timeValue = new Date(`January 1, 1970 ${params.get('entry.1500214518')} UTC`); 
+      params.set('entry.1500214518_hour', timeValue.getUTCHours().toString().padStart(2, '0')); 
+      params.set('entry.1500214518_minute', timeValue.getUTCMinutes().toString().padStart(2, '0')); 
+
+      await fetch(event.target.action, { method: 'POST', body: params, mode: 'no-cors' }); 
+      event.target.elements['status'].textContent = '✔ Form submitted!'; 
+    });
+  </script>
+</body>
+
+</html>
